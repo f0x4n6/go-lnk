@@ -3,7 +3,6 @@ package lnk
 import (
 	"fmt"
 	"io"
-	"os"
 )
 
 // File represents one lnk file.
@@ -51,26 +50,4 @@ func Read(r io.Reader, maxSize uint64) (f File, err error) {
 	}
 
 	return f, err
-}
-
-// Open parses a lnk File.
-func Open(filename string) (f File, err error) {
-	fi, err := os.Open(filename)
-	if err != nil {
-		return f, fmt.Errorf("lnk.File: open file - %s", err.Error())
-	}
-	defer func(fi *os.File) {
-		_ = fi.Close()
-	}(fi)
-
-	// To try and detect malformed lnk files, we'll make sure no section is bigger than the actual file size as that
-	// shouldn't ever happen
-	maxSize := uint64(1 << 22)
-	if s, err := fi.Stat(); err == nil {
-		if maxSize > 0 {
-			maxSize = uint64(s.Size())
-		}
-	}
-
-	return Read(fi, maxSize)
 }
